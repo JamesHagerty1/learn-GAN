@@ -1,0 +1,4 @@
+# Python dependencies
+torch
+torchvision
+matplotlib
