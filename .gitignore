@@ -1,1 +1,3 @@
-*.zip
+data/
+generated_data/
+__pycache__

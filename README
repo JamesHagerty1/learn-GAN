@@ -1,2 +1,2 @@
-Need img_align_celeba from: 
+Place and unzip img_align_celeba.zip under dataroot (see hyperparameters.py). Download img_align_celeba.zip here: 
 https://drive.google.com/drive/folders/0B7EVK8r0v71pTUZsaXdaSnZBZzg?resourcekey=0-rJlzl934LzC-Xp28GeIBzQ

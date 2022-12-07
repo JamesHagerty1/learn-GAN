@@ -13,4 +13,4 @@ import torchvision.utils as vutils
 import numpy as np
 import matplotlib.pyplot as plt
 
-print('imports work')
+print("* imports work")
