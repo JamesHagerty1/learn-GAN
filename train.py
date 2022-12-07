@@ -8,7 +8,7 @@ import torchvision.utils as vutils
 import numpy as np
 import matplotlib.pyplot as plt
 
-from hyperparameters import ngpu, dataroot, image_size, batch_size, workers, lr, beta1, nz, num_epochs
+from hyperparameters import ngpu, dataroot, image_size, batch_size, dataset_size, workers, lr, beta1, nz, num_epochs
 from generator_model import Generator
 from discriminator_model import Discriminator
 from weights import weights_init
@@ -24,7 +24,7 @@ dataset = dset.ImageFolder(root=dataroot,
                            ]))
 print("Dataset ready")
 
-dataset.samples = dataset.samples[:256]
+dataset.samples = dataset.samples[:dataset_size]
 print("Reduced dataset samples")
 
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
@@ -62,7 +62,6 @@ for epoch in range(num_epochs):
     for i, data in enumerate(dataloader, 0):
         
         # D training
-
         netD.zero_grad()
         real_cpu = data[0].to(device)
         b_size = real_cpu.size(0)
@@ -84,27 +83,23 @@ for epoch in range(num_epochs):
         optimizerD.step()
 
         # G training
-
         netG.zero_grad()
         label.fill_(real_label)
         output = netD(fake).view(-1)
         errG = criterion(output, label)
         errG.backward()
         D_G_z2 = output.mean().item()
+
         optimizerG.step()
 
-        # Sanity
-
-        with torch.no_grad():
-            fake = netG(fixed_noise).detach().cpu()
-        img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
-
-        #
+        # Sanity check, currently per epoch
+        if (i == len(dataloader)-1):
+            print("Generating progress images grid...")
+            with torch.no_grad():
+                fake = netG(fixed_noise).detach().cpu()
+            img = vutils.make_grid(fake, padding=2, normalize=True) # can be appended to img_list faster
+            disk_img = np.transpose(img, (1,2,0)).numpy()
+            plt.imsave(f"generated_data/gen{epoch}.jpg", disk_img)
 
         iters += 1
 print("Finished training")
-
-
-for i, img in enumerate(img_list):
-    grid = np.transpose(img, (1,2,0)).numpy()
-    plt.imsave(f"generated_data/gen{i}.jpg", grid)
