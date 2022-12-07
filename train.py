@@ -24,11 +24,12 @@ dataset = dset.ImageFolder(root=dataroot,
                            ]))
 print("Dataset ready")
 
+dataset.samples = dataset.samples[:256]
+print("Reduced dataset samples")
+
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                                          shuffle=True, num_workers=workers)
 print("Dataloader ready")
-
-raise Exception
 
 netG = Generator(ngpu).to(device)
 if (device.type == 'cuda') and (ngpu > 1):
@@ -53,11 +54,9 @@ optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(beta1, 0.999))
 # Progress checking
 fixed_noise = torch.randn(64, nz, 1, 1, device=device)
 img_list = []
-G_losses = []
-D_losses = []
 iters = 0
 
-# For each epoch
+print("Starting training")
 for epoch in range(num_epochs):
     print("Epoch ", epoch)
     for i, data in enumerate(dataloader, 0):
@@ -96,11 +95,16 @@ for epoch in range(num_epochs):
 
         # Sanity
 
-        if (iters % 5 == 0):
-            with torch.no_grad():
-                fake = netG(fixed_noise).detach().cpu()
-            img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
+        with torch.no_grad():
+            fake = netG(fixed_noise).detach().cpu()
+        img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
 
         #
 
         iters += 1
+print("Finished training")
+
+
+for i, img in enumerate(img_list):
+    grid = np.transpose(img, (1,2,0)).numpy()
+    plt.imsave(f"generated_data/gen{i}.jpg", grid)
